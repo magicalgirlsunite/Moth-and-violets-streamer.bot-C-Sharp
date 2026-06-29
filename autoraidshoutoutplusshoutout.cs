@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic; // Required for List<>
-using Twitch.Common.Models.Api; // Required so Streamer.bot understands "ClipData"
+using System.Collections.Generic;
+using Twitch.Common.Models.Api;
 
 public class CPHInline
 {
@@ -9,7 +9,6 @@ public class CPHInline
         string targetLogin = "";
         string viewers = "0";
         
-        // 1. Determine if this was triggered by a Chat Command or a Raid
         bool isCommand = args.ContainsKey("command");
 
         if (isCommand)
@@ -27,24 +26,37 @@ public class CPHInline
             viewers = args.ContainsKey("viewers") ? args["viewers"].ToString() : "0";
         }
 
-        // Safety check
         if (string.IsNullOrEmpty(targetLogin))
         {
             CPH.LogWarn("AutoShoutout: No target name found.");
             return false;
         }
 
-        // 2. GET THEIR MOST VIEWED CLIP
+        // --- OBS ASSET NAMES ---
+        // Change these strings to match your exact OBS setup!
+        string sceneName = "Your Scene Name"; 
+        string raidVideoSource = "Shoutout Storm"; 
+        string clipBrowserSource = "Clip Player"; 
+
+        // 1. GET THEIR MOST VIEWED CLIP
         string clipUrl = "";
+        string clipId = "";
+        float clipDuration = 30f; // Fallback duration in case the API misses it
+
         try
         {
-            // Streamer.bot pulls clips sorted by view count descending by default
             List<ClipData> clips = CPH.GetClipsForUser(targetLogin);
             
-            // If they actually have clips, grab the URL of the top one
             if (clips != null && clips.Count > 0)
             {
                 clipUrl = clips[0].Url; 
+                clipId = clips[0].Id; // We need the raw ID to build the embed player
+                
+                // Streamer.bot pulls the exact duration of the clip in seconds
+                if (clips[0].Duration > 0)
+                {
+                    clipDuration = clips[0].Duration;
+                }
             }
         }
         catch (Exception ex)
@@ -52,38 +64,49 @@ public class CPHInline
             CPH.LogWarn("AutoShoutout Clip Error: " + ex.Message);
         }
 
-        // 3. DROP THE CHAT MESSAGE FIRST
+        // 2. DROP THE CHAT MESSAGE
         string customMessage = isCommand 
             ? $"Check out this awesome broadcaster: https://twitch.tv/{targetLogin}" 
             : $"Thank you to @{targetLogin} for raiding with {viewers} viewers! Check them out at https://twitch.tv/{targetLogin}";
         
-        // Append the clip to the string if we successfully grabbed one
         if (!string.IsNullOrEmpty(clipUrl))
         {
             customMessage += $" | Check out their most viewed clip! {clipUrl}";
         }
-
         CPH.SendMessage(customMessage);
 
-        // 4. RUN THE TWITCH API SHOUTOUT
+        // 3. RUN THE TWITCH API SHOUTOUT
         if (targetLogin != "violetdufromage") 
         {
             CPH.TwitchSendShoutoutByLogin(targetLogin);
         }
 
-        // 5. OBS VIDEO TRIGGER (The Raid/Storm Video)
-        // Ensure these match your OBS naming exactly!
-        string sceneName = "Your Scene Name"; 
-        string sourceName = "Your Video Source Name"; 
+        // 4. PHASE ONE: THE RAID VIDEO
+        // Show the video, wait for its duration, then hide it.
+        CPH.ObsSetSourceVisibility(sceneName, raidVideoSource, true);
+        CPH.Wait(10000); // CHANGE THIS: 10000ms = 10 seconds. Set to the exact length of your storm video!
+        CPH.ObsSetSourceVisibility(sceneName, raidVideoSource, false);
 
-        // Play the video by making it visible
-        CPH.ObsSetSourceVisibility(sceneName, sourceName, true);
-        
-        // Stall the script for the duration of the video (e.g., 10000 = 10 seconds)
-        CPH.Wait(10000); 
+        // 5. PHASE TWO: THE CLIP PLAYER
+        if (!string.IsNullOrEmpty(clipId))
+        {
+            // Build the Twitch Embed URL. (Twitch requires the parent parameter, and autoplay forces it to start).
+            string embedUrl = $"https://clips.twitch.tv/embed?clip={clipId}&parent=twitch.tv&autoplay=true";
 
-        // Hide the video again
-        CPH.ObsSetSourceVisibility(sceneName, sourceName, false);
+            // Inject the URL into the OBS Browser Source
+            CPH.ObsSetBrowserUrl(sceneName, clipBrowserSource, embedUrl);
+            
+            // Make the Browser Source visible so it starts playing
+            CPH.ObsSetSourceVisibility(sceneName, clipBrowserSource, true);
+
+            // Wait for the exact duration of the clip (convert seconds to milliseconds)
+            int waitTimeMs = (int)(clipDuration * 1000);
+            CPH.Wait(waitTimeMs);
+
+            // Hide the clip and clear the URL so phantom audio doesn't keep playing
+            CPH.ObsSetSourceVisibility(sceneName, clipBrowserSource, false);
+            CPH.ObsSetBrowserUrl(sceneName, clipBrowserSource, "about:blank");
+        }
 
         return true;
     }
