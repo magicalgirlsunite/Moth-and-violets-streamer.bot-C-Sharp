@@ -34,6 +34,7 @@ public class CPHInline
 
         // --- OBS ASSET NAMES ---
         // Change these strings to match your exact OBS setup!
+        //don't miss this part mothyyy!
         string sceneName = "Your Scene Name"; 
         string raidVideoSource = "Shoutout Storm"; 
         string clipBrowserSource = "Clip Player"; 
@@ -84,7 +85,9 @@ public class CPHInline
         // 4. PHASE ONE: THE RAID VIDEO
         // Show the video, wait for its duration, then hide it.
         CPH.ObsSetSourceVisibility(sceneName, raidVideoSource, true);
+        //Change the line below
         CPH.Wait(10000); // CHANGE THIS: 10000ms = 10 seconds. Set to the exact length of your storm video!
+        //change the above line
         CPH.ObsSetSourceVisibility(sceneName, raidVideoSource, false);
 
         // 5. PHASE TWO: THE CLIP PLAYER
