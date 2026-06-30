@@ -64,7 +64,7 @@ public class CPHInline
             CPH.SetGlobalVar("lastVipSo_" + targetLogin, DateTime.Now.ToString(), true);
 
             // 4. Wait 10 seconds before shouting out
-            CPH.Wait(10000); //how long to wait before shouting them out so it doesn't feel so aggressive
+            CPH.Wait(10000); //how long to wait before shouting them out so it doesn't feel so aggressive 10000 = 10 seconds
             
             customMessage = $"Look who just dropped into chat! Check out this awesome broadcaster: https://twitch.tv/{targetLogin}"; //the message. you can change to whatever you want here
         }
