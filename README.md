@@ -11,7 +11,7 @@ Various C# scripts for doing stuff like auto raid messages and shoutout commands
 
  3. go to platforms on the left hand side of the menu hell we're getting into. you should see a list of streaming type platforms here.. login to twitch here. also very bottom left side login there too just for good measure.
 
- 4. go to stream apps on the left side menu login to obs
+ 4. go to stream apps on the left side menu and login to obs.
     to do this you will right click in the empty rectangle and click add.
     <img width="1335" height="696" alt="image" src="https://github.com/user-attachments/assets/ec607887-bd5d-4a8b-bc67-69df3bd6efb5" />
     make the form look like this but you need your obs password from obs.
