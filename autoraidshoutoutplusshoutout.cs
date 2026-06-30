@@ -134,14 +134,14 @@ public class CPHInline
         if (!string.IsNullOrEmpty(clipId))
         {
             string embedUrl = $"https://clips.twitch.tv/embed?clip={clipId}&parent=twitch.tv&autoplay=true";
-            CPH.ObsSetBrowserUrl(sceneName, clipBrowserSource, embedUrl);
+            CPH.ObsSetBrowserSource(sceneName, clipBrowserSource, embedUrl);
             CPH.ObsSetSourceVisibility(sceneName, clipBrowserSource, true);
             
             int waitTimeMs = (int)(clipDuration * 1000);
             CPH.Wait(waitTimeMs);
             
             CPH.ObsSetSourceVisibility(sceneName, clipBrowserSource, false);
-            CPH.ObsSetBrowserUrl(sceneName, clipBrowserSource, "about:blank");
+            CPH.ObsSetBrowserSource(sceneName, clipBrowserSource, "about:blank");
         }
 
         return true;
