@@ -37,7 +37,7 @@ Various C# scripts for doing stuff like auto raid messages and shoutout commands
 
 
 8. meanwhile back to the actions menu.
-   click on the quto clip action you made earlier.
+   click on the auto clip action you made earlier.
    right click on the triggers box, go down to add-core-commands-commandtrigger. select the clip command you made. <img width="545" height="548" alt="image" src="https://github.com/user-attachments/assets/1c89251a-95a2-4060-bc68-11ced4ed5d10" />
 
    9.add the code to make the auto clipping command work.
