@@ -9,8 +9,9 @@ public class CPHInline
         // --- CONFIGURATION ---
         // Add the Twitch usernames (lowercase only!) of the homies you want to auto-shoutout
         List<string> vipStreamers = new List<string> { "valentinewar", "violetdufromage", "hotshot87420" };
-        int cooldownHours = 3;
-        
+        int cooldownHours = 3; //how often it will shout these friends out
+
+        //don't mess with these 3 lines
         string targetLogin = "";
         string viewers = "0";
         string customMessage = "";
@@ -63,9 +64,9 @@ public class CPHInline
             CPH.SetGlobalVar("lastVipSo_" + targetLogin, DateTime.Now.ToString(), true);
 
             // 4. Wait 10 seconds before shouting out
-            CPH.Wait(10000);
+            CPH.Wait(10000); //how long to wait before shouting them out so it doesn't feel so aggressive
             
-            customMessage = $"Look who just dropped into chat! Check out this awesome broadcaster: https://twitch.tv/{targetLogin}";
+            customMessage = $"Look who just dropped into chat! Check out this awesome broadcaster: https://twitch.tv/{targetLogin}"; //the message. you can change to whatever you want here
         }
         else
         {
@@ -88,7 +89,7 @@ public class CPHInline
         // 1. GET THEIR MOST VIEWED CLIP
         string clipUrl = "";
         string clipId = "";
-        float clipDuration = 20f; 
+        float clipDuration = 20f; // how long to play the clip before cutting it off. in seconds
 
         try
         {
@@ -110,15 +111,16 @@ public class CPHInline
             CPH.LogWarn("AutoShoutout Clip Error: " + ex.Message);
         }
 
-        // 2. DROP THE CHAT MESSAGE
+        // 2. DROP THE CHAT MESSAGE VERSION or delete this block if you don't want it to send in chat too.
         if (!string.IsNullOrEmpty(clipUrl))
         {
             customMessage += $" | Check out their most viewed clip! {clipUrl}";
         }
         CPH.SendMessage(customMessage);
+        //block ends here
 
         // 3. RUN THE TWITCH API SHOUTOUT
-        if (targetLogin != "violetdufromage") 
+        if (targetLogin != "violetdufromage") // change this to your twitch name.
         {
             CPH.TwitchSendShoutoutByLogin(targetLogin);
         }
