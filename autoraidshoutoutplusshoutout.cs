@@ -135,7 +135,7 @@ public class CPHInline
         // THE CLIP PLAYER
         if (!string.IsNullOrEmpty(clipId))
         {
-            string embedUrl = $"https://clips.twitch.tv/embed?clip={clipId}&parent=twitch.tv&autoplay=true";
+            string embedUrl = $"https://clips.twitch.tv/embed?clip={clipId}&parent=twitch.tv&autoplay=true&muted=false";
             CPH.ObsSetBrowserSource(sceneName, clipBrowserSource, embedUrl);
             CPH.ObsSetSourceVisibility(sceneName, clipBrowserSource, true);
             
