@@ -36,6 +36,9 @@ public class CPHInline
             targetLogin = args.ContainsKey("userName") ? args["userName"].ToString().ToLower() : "";
             viewers = args.ContainsKey("viewers") ? args["viewers"].ToString() : "0";
             customMessage = $"Thank you @{targetLogin} for raiding with {viewers} viewers! Check them out at https://twitch.tv/{targetLogin}";
+            
+            // Wait 6 seconds for the Sound Alerts raid song to finish before doing anything else
+            CPH.Wait(6000); 
         }
         else if (isChatMessage)
         {
@@ -60,13 +63,13 @@ public class CPHInline
                 }
             }
 
-            // 3. Update the cooldown timer in Streamer.bot's memory
+            // Update the cooldown timer in Streamer.bot's memory
             CPH.SetGlobalVar("lastVipSo_" + targetLogin, DateTime.Now.ToString(), true);
 
-            // 4. Wait 10 seconds before shouting out
+            // Wait 10 seconds before shouting out
             CPH.Wait(10000); //how long to wait before shouting them out so it doesn't feel so aggressive 10000 = 10 seconds
             
-            customMessage = $"Look who just dropped into chat! Check out this awesome broadcaster: https://twitch.tv/{targetLogin}"; //the message. you can change to whatever you want here
+            customMessage = $"Look who just dropped into chat! Check out this awesome broadcaster: https://twitch.tv/{targetLogin}"; 
         }
         else
         {
@@ -111,13 +114,12 @@ public class CPHInline
             CPH.LogWarn("AutoShoutout Clip Error: " + ex.Message);
         }
 
-        // 2. DROP THE CHAT MESSAGE VERSION or delete this block if you don't want it to send in chat too.
+        // 2. DROP THE CHAT MESSAGE VERSION 
         if (!string.IsNullOrEmpty(clipUrl))
         {
             customMessage += $" | Check out their most viewed clip! {clipUrl}";
         }
         CPH.SendMessage(customMessage);
-        //block ends here
 
         // 3. RUN THE TWITCH API SHOUTOUT
         if (targetLogin != "violetdufromage") // change this to your twitch name.
@@ -125,23 +127,41 @@ public class CPHInline
             CPH.TwitchSendShoutoutByLogin(targetLogin);
         }
 
+        // 4. THE SIMULTANEOUS CLIP & VIDEO PLAYER
         
-        CPH.ObsSetSourceVisibility(sceneName, raidVideoSource, true);
-        //Change the line below!
-        CPH.Wait(10000); // CHANGE THIS: Set to the length of your video 10000 = 10 seconds!
-        //change the line above!
-        CPH.ObsSetSourceVisibility(sceneName, raidVideoSource, false);
-
-        // THE CLIP PLAYER
+        // Setup the Clip Player (if we successfully found a clip)
         if (!string.IsNullOrEmpty(clipId))
         {
+            // Note the &muted=false at the end of the URL!
             string embedUrl = $"https://clips.twitch.tv/embed?clip={clipId}&parent=twitch.tv&autoplay=true&muted=false";
             CPH.ObsSetBrowserSource(sceneName, clipBrowserSource, embedUrl);
+            
+            // Turn the clip player ON
             CPH.ObsSetSourceVisibility(sceneName, clipBrowserSource, true);
+        }
+
+        // Turn the hype video ON at the exact same time
+        CPH.ObsSetSourceVisibility(sceneName, raidVideoSource, true);
+
+        // Wait for the length of your Hype Video (10000 = 10 seconds)
+        CPH.Wait(10000);//change this to the length of your video 
+
+        // Turn the hype video OFF
+        CPH.ObsSetSourceVisibility(sceneName, raidVideoSource, false);
+
+        // If we had a clip playing, let it finish its remaining time
+        if (!string.IsNullOrEmpty(clipId))
+        {
+            // Calculate how much time the clip has left by subtracting the 10 seconds we already waited
+            int remainingWaitTimeMs = (int)(clipDuration * 1000) - 10000;
             
-            int waitTimeMs = (int)(clipDuration * 1000);
-            CPH.Wait(waitTimeMs);
+            // Wait out the rest of the clip's natural length
+            if (remainingWaitTimeMs > 0)
+            {
+                CPH.Wait(remainingWaitTimeMs);
+            }
             
+            // Clean up and hide the browser source
             CPH.ObsSetSourceVisibility(sceneName, clipBrowserSource, false);
             CPH.ObsSetBrowserSource(sceneName, clipBrowserSource, "about:blank");
         }
