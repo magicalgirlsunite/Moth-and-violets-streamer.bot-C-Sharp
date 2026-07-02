@@ -19,12 +19,11 @@ Various C# scripts for doing stuff like auto raid messages and shoutout commands
 5. open obs. go to the tools tab at the top. click websocket server settings.
    <img width="665" height="651" alt="image" src="https://github.com/user-attachments/assets/5efee2ef-93af-4a7d-a238-ad5f18fdb59f" />
 
+    whats important here is that you click show contact info to get the password and checking the box at the top that says enable websocket server. also make sure to press apply.
 
     5.1 if you are on streamlabs obs it seems the steps to get your password and websocket enabled mayy be different. I don't have streamlabs setup so here is gemini to explain how to do it. (95% chance its right)
    <img width="587" height="749" alt="image" src="https://github.com/user-attachments/assets/ede290f4-3bf4-4faf-a524-14c2d1714058" />
 
-
-   whats important here is that you click show contact info to get the password and checking the box at the top that says enable websocket server. also make sure to press apply.
 
 
 7. go to actions in the streamer bot app.
