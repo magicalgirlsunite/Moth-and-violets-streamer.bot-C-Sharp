@@ -21,13 +21,17 @@ Various C# scripts for doing stuff like auto raid messages and shoutout commands
 
    whats important here is that you click show contact info to get the password and checking the box at the top that says enable websocket server. also make sure to press apply.
 
+   5.1 if you are on streamlabs obs it seems the steps to get your password and websocket enabled mayy be different. I don't have streamlabs setup so here is gemini to explain how to do it. (95% chance its right)
+   <img width="587" height="749" alt="image" src="https://github.com/user-attachments/assets/ede290f4-3bf4-4faf-a524-14c2d1714058" />
 
-6. go to actions in the streamer bot app.
+
+
+7. go to actions in the streamer bot app.
    in the left box right click to bring up a menu within the menu then click add to bring up another menu. lord these menus bout to intensify.
    so that box should be called add action. in here name it auto clip and press ok.
    do this again and name it autoshoutout.
 
-7. now go to the commands menu.(its in the menu on the left side)
+8. now go to the commands menu.(its in the menu on the left side)
    right click add a new command. <img width="830" height="541" alt="image" src="https://github.com/user-attachments/assets/77567fd8-9d21-4f84-bfab-5b392eb36a30" />
 
    do it again for the auto shoutout
