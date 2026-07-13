@@ -8,7 +8,7 @@ public class CPHInline
     {
         // --- CONFIGURATION ---
         // Add the Twitch usernames (lowercase only!) of the homies you want to auto-shoutout
-        List<string> vipStreamers = new List<string> { "valentinewar", "violetdufromage", "hotshot87420" };
+        List<string> vipStreamers = new List<string> { "valentinewar", "brazenbehemothh", "hotshot87420", "dead_mouldy_tree", "ghosthostghostramm", "lily_anatia" };
         int cooldownHours = 3; //how often it will shout these friends out
 
         //don't mess with these 3 lines
@@ -38,7 +38,7 @@ public class CPHInline
             customMessage = $"Thank you @{targetLogin} for raiding with {viewers} viewers! Check them out at https://twitch.tv/{targetLogin}";
             
             // Wait 6 seconds for the Sound Alerts raid song to finish before doing anything else
-            CPH.Wait(6000); 
+            CPH.Wait(10000); 
         }
         else if (isChatMessage)
         {
@@ -85,13 +85,14 @@ public class CPHInline
 
         // --- OBS ASSET NAMES ---
         // Change these to whatever you named your things:3
-        string sceneName = "Your Scene Name"; 
-        string raidVideoSource = "Shoutout Storm"; 
-        string clipBrowserSource = "Clip Player"; 
+        string sceneName = "Scene"; 
+        string raidVideoSource = "jojo raid streamerbot overlay"; 
+        string clipBrowserSource = "raidclipgetterstreamerbot"; // This remains a BROWSER SOURCE
 
-        // 1. GET THEIR MOST VIEWED CLIP
+        // 1. GET THEIR MOST VIEWED CLIP & EXTRACT MP4
         string clipUrl = "";
         string clipId = "";
+        string clipMp4Url = "";
         float clipDuration = 20f; // how long to play the clip before cutting it off. in seconds
 
         try
@@ -106,6 +107,26 @@ public class CPHInline
                 if (clips[0].Duration > 0)
                 {
                     clipDuration = clips[0].Duration;
+                }
+
+                // THE OFFICIAL STREAMER.BOT NATIVE FETCH
+                ClipDownloadData downloadData = CPH.TwitchGetClipDownloadUrls(clipId);
+                
+                if (downloadData != null)
+                {
+                    // Grab the raw MP4 file directly
+                    if (!string.IsNullOrEmpty(downloadData.LandscapeDownloadUrl))
+                    {
+                        clipMp4Url = downloadData.LandscapeDownloadUrl;
+                        CPH.LogInfo("Successfully grabbed MP4: " + clipMp4Url);
+                    }
+                }
+                
+                // BULLETPROOF FALLBACK: If extraction fails, use the standard embedded player so it never stays blank!
+                if (string.IsNullOrEmpty(clipMp4Url))
+                {
+                    clipMp4Url = $"https://clips.twitch.tv/embed?clip={clipId}&parent=twitch.tv&autoplay=true&muted=false";
+                    CPH.LogWarn("Could not grab raw MP4. Falling back to standard Twitch player.");
                 }
             }
         }
@@ -129,12 +150,11 @@ public class CPHInline
 
         // 4. THE SIMULTANEOUS CLIP & VIDEO PLAYER
         
-        // Setup the Clip Player (if we successfully found a clip)
-        if (!string.IsNullOrEmpty(clipId))
+        // Setup the Clip Player
+        if (!string.IsNullOrEmpty(clipMp4Url))
         {
-            // Note the &muted=false at the end of the URL!
-            string embedUrl = $"https://clips.twitch.tv/embed?clip={clipId}&parent=twitch.tv&autoplay=true&muted=false";
-            CPH.ObsSetBrowserSource(sceneName, clipBrowserSource, embedUrl);
+            // Send the URL (whether it's the raw MP4 or the fallback player) to the Browser Source!
+            CPH.ObsSetBrowserSource(sceneName, clipBrowserSource, clipMp4Url);
             
             // Turn the clip player ON
             CPH.ObsSetSourceVisibility(sceneName, clipBrowserSource, true);
@@ -144,16 +164,16 @@ public class CPHInline
         CPH.ObsSetSourceVisibility(sceneName, raidVideoSource, true);
 
         // Wait for the length of your Hype Video (10000 = 10 seconds)
-        CPH.Wait(10000);//change this to the length of your video 
+        CPH.Wait(25000); //change this to length of your video
 
         // Turn the hype video OFF
         CPH.ObsSetSourceVisibility(sceneName, raidVideoSource, false);
 
         // If we had a clip playing, let it finish its remaining time
-        if (!string.IsNullOrEmpty(clipId))
+        if (!string.IsNullOrEmpty(clipMp4Url))
         {
-            // Calculate how much time the clip has left by subtracting the 10 seconds we already waited
-            int remainingWaitTimeMs = (int)(clipDuration * 1000) - 10000;
+            // Calculate how much time the clip has left by subtracting the 25 seconds we already waited
+            int remainingWaitTimeMs = (int)(clipDuration * 1000) - 25000;
             
             // Wait out the rest of the clip's natural length
             if (remainingWaitTimeMs > 0)
@@ -161,9 +181,11 @@ public class CPHInline
                 CPH.Wait(remainingWaitTimeMs);
             }
             
-            // Clean up and hide the browser source
+            // Clean up and hide the Browser Source
             CPH.ObsSetSourceVisibility(sceneName, clipBrowserSource, false);
-            CPH.ObsSetBrowserSource(sceneName, clipBrowserSource, "about:blank");
+            
+            // Empty the Browser Source so it stops holding the video in memory
+            CPH.ObsSetBrowserSource(sceneName, clipBrowserSource, "about:blank"); 
         }
 
         return true;
